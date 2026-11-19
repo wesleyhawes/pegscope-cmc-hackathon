@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17312d">
+  <title>PegScope · Stablecoin incident desk</title>
+  <style>:root{color-scheme:light;--canvas:#f4f6f1;--panel:#fff;--ink:#19332d;--muted:#52655d;--border:#d2dcd3;--soft:#edf2ec;--green:#2d604f;--display:Inter,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SFMono-Regular",Consolas,monospace}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--canvas);color:var(--ink);font:15px/1.5 var(--display)}
+.wrap{width:min(1184px,calc(100% - 72px));margin:0 auto}
+.mast{background:#17312d;color:#fff;border-bottom:3px solid #a6d37d}
+.mast-inner{display:flex;align-items:center;justify-content:space-between;min-height:59px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:720;letter-spacing:-.055em;font-size:24px}.mast-note{color:#d0dbcf;font-size:13px}
+.title-row{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:31px 0 21px}
+h1,h2,p,figure{margin:0}
+h1{font-size:clamp(32px,4.2vw,60px);line-height:1.03;letter-spacing:-.065em;font-weight:660}
+.subtitle{color:var(--muted);margin-top:8px;font-size:15px}
+.source-badge{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;align-self:flex-start;margin-top:5px;padding:6px 10px;border:1px solid #a9bba9;background:#e9f3df;border-radius:5px;font-size:12px;font-weight:700}
+.source-badge:before{content:"";background:#49663a;border-radius:2px;width:7px;height:7px}
+.source-badge.live{background:#e0f0f6;border-color:#a6c7d5}.source-badge.live:before{background:#315f75}
+.toolbar{background:var(--panel);border:1px solid var(--border);border-radius:9px;display:flex;gap:24px;align-items:center;padding:13px 17px}
+.control-group{min-width:210px}.field,label,.evidence dt{display:block;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.055em;text-transform:uppercase}
+button,select,input,textarea{font:inherit}
+select,.refresh,.copy{border:1px solid #bfccc1;border-radius:5px;color:var(--ink);background:white;cursor:pointer}
+select{margin-top:4px;min-height:33px;padding:3px 24px 3px 9px;width:100%;font-size:13px;font-weight:600}
+.step-box{width:min(215px,24vw)}.step-label{display:flex;align-items:center;justify-content:space-between;gap:10px}.step-label output{font:11px var(--mono);color:var(--muted)}
+input[type=range]{accent-color:#326351;width:100%;display:block;margin:8px 0 0;cursor:pointer}
+.observation{margin-left:auto}.observation time,.meta-grid span+span,.evidence dd,.quote b{font-variant-numeric:tabular-nums}
+.observation time{display:block;margin-top:3px;font-size:13px}
+.refresh,.copy{font-weight:650;font-size:12px;padding:7px 13px;min-height:32px}
+.refresh:hover,.copy:hover,select:hover{background:#f0f5ec}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid #8357bd;outline-offset:3px}
+button:disabled{cursor:wait;opacity:.65}
+.asset-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+.asset{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;background:#fff;border:1px solid var(--border);border-radius:7px;padding:10px 13px;min-height:61px;cursor:pointer;color:var(--ink)}
+.asset:hover{border-color:#749784}.asset[aria-pressed=true]{background:#e9f2e6;border-color:#397052;box-shadow:inset 3px 0 #397052}
+.asset-symbol{display:block;font-weight:750;font-size:15px}.asset-bps{font:12px var(--mono);color:#52645b}
+.asset-state{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+.asset-state:before,.status:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--state-dot,#78837e)}
+.normal{--state-dot:#32815a;--state-text:#23563c;--state-bg:#e5f1e5}.watch{--state-dot:#b47d1d;--state-text:#704903;--state-bg:#fff0c8}.incident{--state-dot:#b44338;--state-text:#8e3229;--state-bg:#fbe4df}.unknown{--state-dot:#74747e;--state-text:#525160;--state-bg:#efedf2}
+.workarea{display:grid;grid-template-columns:minmax(0,1.68fr) minmax(290px,1fr);gap:15px;align-items:start}
+.panel,.empty,.interpret{border:1px solid var(--border);border-radius:9px;background:var(--panel)}
+.incident-panel,.side .panel,.empty{padding:19px 21px}
+.panel-header,.side-header,.quote-row{display:flex;align-items:center;justify-content:space-between;gap:13px}
+h2{font-size:19px;line-height:1.25;letter-spacing:-.035em}
+.panel-header h2{font-size:28px;margin-top:1px}
+.status{background:var(--state-bg,var(--soft));color:var(--state-text,var(--muted));border-radius:4px;display:inline-flex;align-items:center;gap:7px;padding:4px 8px;font-weight:700;font-size:13px}
+.quote-row{margin-top:12px;align-items:end}
+.metric{font:600 clamp(36px,4.7vw,58px)/1.05 var(--display);letter-spacing:-.065em;font-variant-numeric:tabular-nums}
+.field.plain{font-size:12px;text-transform:none;letter-spacing:0;font-weight:500;margin-top:4px}.quote{text-align:right}.quote b{font-family:var(--mono);font-size:15px}
+figure{margin:10px 0 13px}
+#chart{min-width:0}#chart svg{display:block;width:100%;height:auto;min-height:110px;max-height:210px;overflow:visible}
+#chart svg text{font-family:var(--mono);fill:#52645b;font-size:11px}#chart .grid{stroke:#dfe7df;stroke-dasharray:3 5}#chart .peg{stroke:#668577;stroke-width:1.3}
+#chart .trace{fill:none;stroke:#26684d;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#chart .point{fill:#26684d}.chart-empty{padding:22px 0;color:var(--muted)}
+figcaption{font-size:11px;color:var(--muted)}
+.reason-box{background:var(--soft);border-radius:5px;padding:10px 12px}.reason-box p{font-size:14px;margin-top:2px}
+.meta-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-top:15px}
+.meta-grid span+span{display:block;font-size:13px;margin-top:2px}
+.age-warning{color:#814819;background:#fff2d8;border-radius:4px;padding:6px 9px;margin-top:9px;font-size:12px}
+.side{display:grid;gap:14px;min-width:0}.side .panel{min-width:0}
+.brief-panel{border-top:3px solid #3e6754}.brief{white-space:pre-line;overflow-wrap:anywhere;font:13px/1.55 var(--mono);margin-top:12px}
+.evidence{margin:10px 0 0}.evidence>div{padding:7px 0;border-bottom:1px solid #e6ece5;display:grid;grid-template-columns:100px minmax(0,1fr);gap:10px}
+.evidence dd{margin:0;font-size:13px;overflow-wrap:anywhere}.evidence dt{padding-top:2px;font-size:10px}
+.evidence code{font:12px var(--mono)}.evidence-note{font-size:12px;color:var(--muted);margin-top:10px}
+.interpret{margin-top:15px}.interpret summary{font-size:14px;font-weight:650;cursor:pointer;padding:12px 17px}.interpret-body{padding:0 17px 12px;color:var(--muted);font-size:13px}.interpret-body p+p{margin-top:6px}
+.empty{margin:16px 0}.empty p{color:var(--muted);margin-top:6px}
+footer.wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid var(--border);margin-top:28px;padding:14px 0 22px;color:var(--muted);font-size:12px}
+footer a{color:#355949;text-underline-offset:3px}
+.sr-only,.skip:not(:focus){position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.skip:focus{position:absolute;top:6px;left:6px;z-index:10;background:white;padding:8px}
+.copy-manual{margin-top:8px}.copy-manual textarea{width:100%}
+@media(max-width:860px){.wrap{width:calc(100% - 36px)}.toolbar{gap:14px}.control-group{min-width:175px}.workarea{grid-template-columns:minmax(0,1.45fr) minmax(245px,1fr)}.incident-panel,.side .panel{padding:15px}.evidence>div{grid-template-columns:78px 1fr}.asset-list{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}}
+@media(max-width:690px){.title-row{align-items:flex-start;flex-direction:column;gap:7px;margin:23px 0 13px}.subtitle{font-size:14px}.source-badge{margin:0}.toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:11px 15px}.control-group,.step-box{min-width:0;width:auto}.step-box{width:115px}.observation{margin:0}.refresh{justify-self:end}.workarea{grid-template-columns:1fr}.asset-list{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))}.mast-inner{min-height:51px}.brand{font-size:21px}.mast-note{font-size:11px}.asset{padding:9px 10px}.brief{font-size:13px}.workarea,.side{gap:12px}}
+@media(max-width:400px){.wrap{width:calc(100% - 24px)}.step-box{width:95px}.title-row h1{font-size:34px}.quote b{font-size:13px}}
+.impact{border-top:1px solid var(--border);margin-top:15px;padding-top:12px;display:grid;align-items:end;grid-template-columns:1.3fr 1fr;gap:10px}.impact input{font:14px var(--mono);border:1px solid #bfccc1;border-radius:4px;padding:6px 7px;width:min(100%,153px);color:var(--ink);margin-top:4px}.impact output{font:650 19px var(--display);display:block;margin:4px 0 2px;font-variant-numeric:tabular-nums}.impact-detail{font-size:11px;color:var(--muted);margin-top:5px}
+.changes{list-style:none;padding:0;margin:8px 0 0}.changes li{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid #e6ece5;padding:5px 0;font-size:12px}.changes .asset-state{color:var(--state-text)}.changes time{color:var(--muted);font:11px var(--mono)}
+</style>
+
+</head>
+<body>
+  <a class="skip" href="#incident">Skip to incident detail</a>
+  <header class="mast">
+    <div class="wrap mast-inner">
+      <div class="brand">
+        <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#c9f78d"/><path d="M5 18h5l3-8 4 14 3-10 2 4h5" fill="none" stroke="#17312d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>PegScope</span>
+      </div>
+      <span class="mast-note">USD stablecoin monitor</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="title-row">
+      <div><h1>Stablecoin incident desk</h1><p class="subtitle">Track deviations from the $1 peg and verify which alerts need investigation.</p></div>
+      <span id="source-badge" class="source-badge">Loading source</span>
+    </div>
+
+    <section class="toolbar" aria-label="Observation controls">
+      <div class="control-group">
+        <label for="mode">Data view</label>
+        <select id="mode">
+          <optgroup label="Synthetic replays">
+            <option value="drift">Replay · Peg drift</option>
+            <option value="recovery">Replay · Recovery</option>
+            <option value="stale">Replay · Stale feed</option>
+            <option value="quiet">Replay · Quiet market</option>
+          </optgroup>
+          <option value="live">Live · Collected quotes</option>
+        </select>
+      </div>
+      <div class="step-box" id="step-box" hidden>
+        <div class="step-label"><label for="step">Replay frame</label><output id="frame" for="step">—</output></div>
+        <input aria-label="Replay frame" id="step" type="range" min="1" max="1" value="1">
+      </div>
+      <div class="observation"><span class="field">Report time · UTC</span><time id="observed">—</time></div>
+      <button type="button" id="refresh" class="refresh">Refresh</button>
+    </section>
+    <div id="announcements" class="sr-only" role="status" aria-live="polite"></div>
+    <section id="empty" class="empty" role="status" hidden><h2 id="empty-title"></h2><p id="empty-message"></p></section>
+    <div id="results" hidden>
+      <section class="watchlist" aria-label="Monitored assets"><div id="asset-list" class="asset-list"></div></section>
+      <div class="workarea">
+        <section class="panel incident-panel" id="incident" tabindex="-1" aria-labelledby="focus-title">
+          <div class="panel-header"><div><div class="field">Selected asset</div><h2 id="focus-title">—</h2></div><span id="focus-state" class="status">—</span></div>
+          <div class="quote-row"><div><div id="focus-bps" class="metric">—</div><div class="field plain">Deviation from $1 in basis points</div></div><div class="quote"><div class="field">USD quote</div><b id="focus-price">—</b></div></div>
+          <figure><div id="chart"></div><figcaption id="chart-caption">Observed deviations over time, UTC.</figcaption></figure>
+          <div class="reason-box"><span class="field">Triage finding</span><p id="reason"></p></div>
+          <div class="meta-grid"><div><span class="field">Quote updated · UTC</span><span id="quote-time">—</span></div><div><span class="field" id="age-label">Age at report</span><span id="quote-age">—</span></div></div>
+          <div id="age-warning" class="age-warning" role="status" hidden></div>
+          <div class="impact">
+            <div><label for="units">Treasury impact · example units</label><input type="number" id="units" min="0" max="1000000000000" step="any" value="100000"></div>
+            <div><span class="field">Mark versus $1</span><output id="impact-value" for="units">—</output></div>
+          </div>
+          <p id="impact-detail" class="impact-detail">Illustrative change in marked value, before fees or slippage.</p>
+        </section>
+        <aside class="side">
+          <section class="panel brief-panel" aria-labelledby="brief-title">
+            <div class="side-header"><h2 id="brief-title">Triage brief</h2><button class="copy" type="button" id="copy">Copy brief</button></div>
+            <p class="brief" id="brief"></p>
+            <div class="copy-manual" id="copy-manual" hidden><label for="copy-text">Select and copy the brief</label><textarea id="copy-text" rows="5" readonly></textarea></div>
+          </section>
+          <section class="panel changes-panel" id="changes-panel" aria-labelledby="changes-title" hidden>
+            <div class="side-header"><h2 id="changes-title">Recent state changes</h2><span class="field">UTC</span></div>
+            <ol id="changes" class="changes"></ol>
+          </section>
+          <section class="panel evidence-panel" aria-labelledby="evidence-title">
+            <div class="side-header"><h2 id="evidence-title">Evidence</h2></div>
+            <dl class="evidence">
+              <div><dt>Data source</dt><dd id="report-source">—</dd></div>
+              <div id="evidence-slot" hidden><dt>Call source</dt><dd id="call-source"></dd></div>
+              <div id="endpoint-slot" hidden><dt>Endpoint</dt><dd><code id="endpoint"></code></dd></div>
+              <div id="fetched-slot" hidden><dt>Fetched · UTC</dt><dd id="fetched"></dd></div>
+              <div id="credit-slot" hidden><dt>Call credits</dt><dd id="credits"></dd></div>
+            </dl>
+            <p class="evidence-note" id="evidence-note"></p>
+          </section>
+        </aside>
+      </div>
+      <details class="interpret"><summary>How alerts are classified</summary><div class="interpret-body">
+        <p>One basis point is $0.0001 per token at a $1 peg. Negative values indicate a discount and positive values a premium.</p>
+        <p><strong>Watch</strong> begins at an absolute deviation of 25 bp. <strong>Incident</strong> requires two distinct, fresh quotes at least 50 bp from $1 on the same side. Two distinct quotes within 10 bp of the peg clear a confirmed incident. Freshness and the maximum gap between confirming observations are both 180 seconds.</p>
+        <p>Each quote is a CMC aggregate. Check venue prices and issuer redemption status separately when investigating an alert.</p>
+      </div></details>
+    </div>
+    <noscript><p>Enable JavaScript to select a replay and inspect observations.</p></noscript>
+  </main>
+  <footer class="wrap"><span>PegScope</span><a href="https://coinmarketcap.com/">Data provided by CoinMarketCap.com</a></footer>
+<script type="application/json" id="replay-data">{"drift":[{"as_of":"2026-11-18T12:00:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":1,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:01:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":2,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:02:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9994,"bps":-6.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":3,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:03:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9982,"bps":-18.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":4,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:04:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":3408,"symbol":"USDC","state":"Watch","reason":"Deviation reached the 25 bp watch threshold.","price":0.9968,"bps":-32.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"}],"brief":"Watch: USDC. Normal: USDT, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":5,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:05:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":3408,"symbol":"USDC","state":"Watch","reason":"First qualifying breach. Waiting for a second distinct quote on the same side.","price":0.9945,"bps":-55.0,"run":1,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"}],"brief":"Watch: USDC. Normal: USDT, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":6,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:06:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side.","price":0.9939,"bps":-61.0,"run":2,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":7,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:07:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"3 distinct quotes at least 50 bp from $1 on the same side.","price":0.993,"bps":-70.0,"run":3,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"drift","source":"Synthetic scenario • illustrative prices","step":8,"steps":8,"evidence":null}],"recovery":[{"as_of":"2026-11-18T12:00:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":1,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:01:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":2,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:02:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9994,"bps":-6.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":3,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:03:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9982,"bps":-18.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":4,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:04:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":3408,"symbol":"USDC","state":"Watch","reason":"Deviation reached the 25 bp watch threshold.","price":0.9968,"bps":-32.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"}],"brief":"Watch: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":5,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:05:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":3408,"symbol":"USDC","state":"Watch","reason":"First qualifying breach. Waiting for a second distinct quote on the same side.","price":0.9945,"bps":-55.0,"run":1,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"}],"brief":"Watch: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":6,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:06:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side.","price":0.9939,"bps":-61.0,"run":2,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":7,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:07:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"3 distinct quotes at least 50 bp from $1 on the same side.","price":0.993,"bps":-70.0,"run":3,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":8,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:08:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0},{"at":"2026-11-18T12:08:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:08:00Z","last_valid_update":"2026-11-18T12:08:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"Incident stays open until two distinct quotes are within 10 bp of $1.","price":0.9965,"bps":-35.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0},{"at":"2026-11-18T12:08:00Z","bps":-35.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:08:00Z","last_valid_update":"2026-11-18T12:08:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0},{"at":"2026-11-18T12:08:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:08:00Z","last_valid_update":"2026-11-18T12:08:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":9,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:09:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0},{"at":"2026-11-18T12:08:00Z","bps":1.0},{"at":"2026-11-18T12:09:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:09:00Z","last_valid_update":"2026-11-18T12:09:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"Incident stays open until two distinct quotes are within 10 bp of $1.","price":0.9982,"bps":-18.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0},{"at":"2026-11-18T12:08:00Z","bps":-35.0},{"at":"2026-11-18T12:09:00Z","bps":-18.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:09:00Z","last_valid_update":"2026-11-18T12:09:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0},{"at":"2026-11-18T12:08:00Z","bps":0.0},{"at":"2026-11-18T12:09:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:09:00Z","last_valid_update":"2026-11-18T12:09:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":10,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:10:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0},{"at":"2026-11-18T12:08:00Z","bps":1.0},{"at":"2026-11-18T12:09:00Z","bps":0.0},{"at":"2026-11-18T12:10:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:10:00Z","last_valid_update":"2026-11-18T12:10:00Z"},{"id":3408,"symbol":"USDC","state":"Incident","reason":"First quote inside the 10 bp recovery band. One more clears the incident.","price":0.9992,"bps":-8.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0},{"at":"2026-11-18T12:08:00Z","bps":-35.0},{"at":"2026-11-18T12:09:00Z","bps":-18.0},{"at":"2026-11-18T12:10:00Z","bps":-8.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."}],"updated":"2026-11-18T12:10:00Z","last_valid_update":"2026-11-18T12:10:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0},{"at":"2026-11-18T12:08:00Z","bps":0.0},{"at":"2026-11-18T12:09:00Z","bps":-1.0},{"at":"2026-11-18T12:10:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:10:00Z","last_valid_update":"2026-11-18T12:10:00Z"}],"brief":"Incident: USDC. Normal: USDT, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":11,"steps":12,"evidence":null},{"as_of":"2026-11-18T12:11:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0},{"at":"2026-11-18T12:08:00Z","bps":1.0},{"at":"2026-11-18T12:09:00Z","bps":0.0},{"at":"2026-11-18T12:10:00Z","bps":-2.0},{"at":"2026-11-18T12:11:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:11:00Z","last_valid_update":"2026-11-18T12:11:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Recovered on two distinct quotes within 10 bp of $1.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-6.0},{"at":"2026-11-18T12:03:00Z","bps":-18.0},{"at":"2026-11-18T12:04:00Z","bps":-32.0},{"at":"2026-11-18T12:05:00Z","bps":-55.0},{"at":"2026-11-18T12:06:00Z","bps":-61.0},{"at":"2026-11-18T12:07:00Z","bps":-70.0},{"at":"2026-11-18T12:08:00Z","bps":-35.0},{"at":"2026-11-18T12:09:00Z","bps":-18.0},{"at":"2026-11-18T12:10:00Z","bps":-8.0},{"at":"2026-11-18T12:11:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:04:00Z","state":"Watch","reason":"Deviation reached the 25 bp watch threshold."},{"at":"2026-11-18T12:06:00Z","state":"Incident","reason":"2 distinct quotes at least 50 bp from $1 on the same side."},{"at":"2026-11-18T12:11:00Z","state":"Normal","reason":"Recovered on two distinct quotes within 10 bp of $1."}],"updated":"2026-11-18T12:11:00Z","last_valid_update":"2026-11-18T12:11:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0},{"at":"2026-11-18T12:08:00Z","bps":0.0},{"at":"2026-11-18T12:09:00Z","bps":-1.0},{"at":"2026-11-18T12:10:00Z","bps":1.0},{"at":"2026-11-18T12:11:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:11:00Z","last_valid_update":"2026-11-18T12:11:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"recovery","source":"Synthetic scenario • illustrative prices","step":12,"steps":12,"evidence":null}],"stale":[{"as_of":"2026-11-18T12:00:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":1,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:01:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":2,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:02:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":3,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:03:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":4,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:04:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":5,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:05:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":3408,"symbol":"USDC","state":"Unknown","reason":"Source quote is 240s old, beyond the 180s freshness limit.","price":null,"bps":null,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":2.0},{"at":"2026-11-18T12:05:00Z","bps":null}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:05:00Z","state":"Unknown","reason":"Source quote is 240s old, beyond the 180s freshness limit."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"}],"brief":"Unknown: USDC. Normal: USDT, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":6,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:06:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":3408,"symbol":"USDC","state":"Unknown","reason":"Source quote is 300s old, beyond the 180s freshness limit.","price":null,"bps":null,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":2.0},{"at":"2026-11-18T12:05:00Z","bps":null},{"at":"2026-11-18T12:06:00Z","bps":null}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:05:00Z","state":"Unknown","reason":"Source quote is 240s old, beyond the 180s freshness limit."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"}],"brief":"Unknown: USDC. Normal: USDT, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":7,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:07:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":3408,"symbol":"USDC","state":"Unknown","reason":"Source quote is 360s old, beyond the 180s freshness limit.","price":null,"bps":null,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":2.0},{"at":"2026-11-18T12:05:00Z","bps":null},{"at":"2026-11-18T12:06:00Z","bps":null},{"at":"2026-11-18T12:07:00Z","bps":null}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."},{"at":"2026-11-18T12:05:00Z","state":"Unknown","reason":"Source quote is 240s old, beyond the 180s freshness limit."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"}],"brief":"Unknown: USDC. Normal: USDT, DAI.","mode":"stale","source":"Synthetic scenario • illustrative prices","step":8,"steps":8,"evidence":null}],"quiet":[{"as_of":"2026-11-18T12:00:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:00:00Z","last_valid_update":"2026-11-18T12:00:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":1,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:01:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:01:00Z","last_valid_update":"2026-11-18T12:01:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":2,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:02:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:02:00Z","last_valid_update":"2026-11-18T12:02:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":3,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:03:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0},{"at":"2026-11-18T12:03:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:03:00Z","last_valid_update":"2026-11-18T12:03:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":4,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:04:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0},{"at":"2026-11-18T12:03:00Z","bps":1.0},{"at":"2026-11-18T12:04:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:04:00Z","last_valid_update":"2026-11-18T12:04:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":5,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:05:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0,"bps":0.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0},{"at":"2026-11-18T12:03:00Z","bps":1.0},{"at":"2026-11-18T12:04:00Z","bps":-3.0},{"at":"2026-11-18T12:05:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9999,"bps":-1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:05:00Z","last_valid_update":"2026-11-18T12:05:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":6,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:06:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9998,"bps":-2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0},{"at":"2026-11-18T12:03:00Z","bps":1.0},{"at":"2026-11-18T12:04:00Z","bps":-3.0},{"at":"2026-11-18T12:05:00Z","bps":2.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:06:00Z","last_valid_update":"2026-11-18T12:06:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":7,"steps":8,"evidence":null},{"as_of":"2026-11-18T12:07:00Z","assets":[{"id":825,"symbol":"USDT","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0002,"bps":2.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":1.0},{"at":"2026-11-18T12:01:00Z","bps":0.0},{"at":"2026-11-18T12:02:00Z","bps":-2.0},{"at":"2026-11-18T12:03:00Z","bps":2.0},{"at":"2026-11-18T12:04:00Z","bps":1.0},{"at":"2026-11-18T12:05:00Z","bps":0.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":2.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":3408,"symbol":"USDC","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":1.0001,"bps":1.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":2.0},{"at":"2026-11-18T12:02:00Z","bps":-1.0},{"at":"2026-11-18T12:03:00Z","bps":1.0},{"at":"2026-11-18T12:04:00Z","bps":-3.0},{"at":"2026-11-18T12:05:00Z","bps":2.0},{"at":"2026-11-18T12:06:00Z","bps":-2.0},{"at":"2026-11-18T12:07:00Z","bps":1.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"},{"id":4943,"symbol":"DAI","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold.","price":0.9997,"bps":-3.0,"run":0,"series":[{"at":"2026-11-18T12:00:00Z","bps":0.0},{"at":"2026-11-18T12:01:00Z","bps":-1.0},{"at":"2026-11-18T12:02:00Z","bps":1.0},{"at":"2026-11-18T12:03:00Z","bps":-3.0},{"at":"2026-11-18T12:04:00Z","bps":0.0},{"at":"2026-11-18T12:05:00Z","bps":-1.0},{"at":"2026-11-18T12:06:00Z","bps":1.0},{"at":"2026-11-18T12:07:00Z","bps":-3.0}],"events":[{"at":"2026-11-18T12:00:00Z","state":"Normal","reason":"Fresh quote is inside the 25 bp watch threshold."}],"updated":"2026-11-18T12:07:00Z","last_valid_update":"2026-11-18T12:07:00Z"}],"brief":"Normal: USDT, USDC, DAI.","mode":"quiet","source":"Synthetic scenario • illustrative prices","step":8,"steps":8,"evidence":null}]}</script>
+<script>"use strict";
+
+const byId = (id) => document.getElementById(id);
+const number = (n) => typeof n === "number" && Number.isFinite(n);
+const mode = byId("mode");
+const step = byId("step");
+const units = byId("units");
+const ns = "http://www.w3.org/2000/svg";
+const embedded = byId("replay-data");
+const replayData = embedded ? JSON.parse(embedded.textContent) : null;
+if (replayData) {
+  const liveOption = mode.querySelector('option[value="live"]');
+  liveOption.textContent = "Live · Server required";
+  liveOption.disabled = true;
+  liveOption.hidden = true;
+}
+const supportedModes = Array.from(mode.options, (option) => option.value);
+const params = new URLSearchParams(location.search);
+if (supportedModes.includes(params.get("mode"))) mode.value = params.get("mode");
+
+let report = null;
+let selected = null;
+let requestId = 0;
+let scrubTimer;
+let currentController;
+let copyReset;
+
+function text(id, value) {
+  byId(id).textContent = value == null ? "—" : String(value);
+}
+
+function asDate(value) {
+  const ms = value ? Date.parse(value) : NaN;
+  return Number.isFinite(ms) ? new Date(ms) : null;
+}
+
+function dateText(value) {
+  return asDate(value)?.toISOString().slice(0, 19).replace("T", " ") ?? "Unavailable";
+}
+
+function ageText(seconds) {
+  if (seconds < 60) return seconds + " s";
+  if (seconds < 3600) return Math.floor(seconds / 60) + " min " + (seconds % 60) + " s";
+  if (seconds < 86400) return Math.floor(seconds / 3600) + " h " + Math.floor(seconds % 3600 / 60) + " min";
+  return Math.floor(seconds / 86400) + " d " + Math.floor(seconds % 86400 / 3600) + " h";
+}
+
+function signed(value, decimals = 1) {
+  if (!number(value)) return "—";
+  const rounded = Math.abs(value).toFixed(decimals);
+  return (Number(rounded) === 0 ? "" : value < 0 ? "−" : "+") + rounded;
+}
+
+function stateClass(state) {
+  const value = String(state).toLowerCase();
+  return ["normal", "watch", "incident", "unknown"].includes(value) ? value : "unknown";
+}
+
+function activeAsset() {
+  return report?.assets.find((asset) => asset.id === selected);
+}
+
+function sourceBadge(live) {
+  const badge = byId("source-badge");
+  badge.textContent = live ? "Live collection" : "Synthetic replay";
+  badge.classList.toggle("live", live);
+}
+
+function renderAssetList() {
+  const target = byId("asset-list");
+  const focusId = document.activeElement?.dataset.assetId;
+  target.replaceChildren();
+  for (const asset of report.assets) {
+    const button = document.createElement("button");
+    button.className = "asset";
+    button.type = "button";
+    button.dataset.assetId = String(asset.id);
+    button.setAttribute("aria-pressed", String(asset.id === selected));
+    const left = document.createElement("span");
+    const name = document.createElement("span");
+    name.className = "asset-symbol";
+    name.textContent = asset.symbol;
+    const deviation = document.createElement("span");
+    deviation.className = "asset-bps";
+    deviation.textContent = number(asset.bps) ? signed(asset.bps) + " bp" : "No quote";
+    const status = document.createElement("span");
+    status.className = "asset-state " + stateClass(asset.state);
+    status.textContent = asset.state;
+    left.append(name, deviation);
+    button.append(left, status);
+    button.addEventListener("click", () => {
+      selected = asset.id;
+      resetCopy();
+      renderAssetList();
+      renderSelected();
+      text("announcements", asset.symbol + " selected. " + asset.state + ". " + asset.reason);
+    });
+    target.append(button);
+    if (focusId === String(asset.id)) button.focus({preventScroll:true});
+  }
+}
+
+function svgEl(parent, name, attributes, content = "") {
+  const elem = document.createElementNS(ns, name);
+  for (const [key,value] of Object.entries(attributes)) elem.setAttribute(key, String(value));
+  if (content) elem.textContent = content;
+  parent.append(elem);
+  return elem;
+}
+
+function chart(asset) {
+  const target = byId("chart");
+  target.replaceChildren();
+  const points = (asset.series || []).map((p) => ({value:p.bps, ms:asDate(p.at)?.getTime()}))
+    .filter((p) => number(p.ms)).sort((a,b) => a.ms - b.ms);
+  const valid = points.filter((p) => number(p.value));
+  text("chart-caption", "Observed deviation in basis points. The solid horizontal line marks the $1 peg. Times are UTC.");
+  if (!valid.length) {
+    const note = document.createElement("p");
+    note.className = "chart-empty";
+    note.textContent = "Awaiting a valid price observation.";
+    target.append(note);
+    return;
+  }
+  const W = 558, H = 148, L = 49, R = 14, T = 12, B = 28;
+  const svg = svgEl(target, "svg", {viewBox:"0 0 " + W + " " + H, role:"img", "aria-labelledby":"chart-title chart-description"});
+  svgEl(svg, "title", {id:"chart-title"}, asset.symbol + " deviation history");
+  const extrema = valid.map((p) => p.value);
+  svgEl(svg, "desc", {id:"chart-description"}, valid.length + " observations from " + dateText(new Date(valid[0].ms).toISOString()) + " UTC to " + dateText(new Date(valid.at(-1).ms).toISOString()) + " UTC. Observed range " + signed(Math.min(...extrema)) + " to " + signed(Math.max(...extrema)) + " basis points.");
+  const desired = Math.max(10, ...extrema.map(Math.abs));
+  const magnitude = 10 ** Math.floor(Math.log10(desired));
+  const limit = Math.ceil(desired / magnitude / 0.5) * 0.5 * magnitude;
+  const start = points[0].ms, end = points.at(-1).ms;
+  const px = (m) => start === end ? (W + L - R)/2 : L + (m - start) / (end - start) * (W - L - R);
+  const py = (v) => T + (limit - v) / (limit * 2) * (H - B - T);
+  for (const tick of [limit,0,-limit]) {
+    svgEl(svg, "line", {x1:L, x2:W-R, y1:py(tick), y2:py(tick), class:tick === 0 ? "peg" : "grid"});
+    svgEl(svg, "text", {x:L-7, y:py(tick)+4, "text-anchor":"end"}, signed(tick, Number.isInteger(tick) ? 0 : 1));
+  }
+  let path = "", last = null;
+  for (const p of points) {
+    if (!number(p.value)) { last = null; continue; }
+    const command = last === null || p.ms - last > 180000 ? "M" : "L";
+    path += command + px(p.ms) + "," + py(p.value) + " ";
+    last = p.ms;
+  }
+  svgEl(svg,"path",{d:path, class:"trace"});
+  for (const [index,p] of valid.entries()) {
+    const circle = svgEl(svg,"circle",{cx:px(p.ms), cy:py(p.value), r:index === valid.length-1 ? 4.3 : 2.5, class:"point"});
+    svgEl(circle,"title",{}, new Date(p.ms).toISOString() + " · " + signed(p.value) + " bp");
+  }
+  const time = (ms) => new Date(ms).toISOString().slice(11,19);
+  svgEl(svg,"text",{x:L, y:H-7},time(start));
+  if (end !== start) svgEl(svg,"text",{x:W-R, y:H-7, "text-anchor":"end"},time(end));
+}
+
+function refreshAge() {
+  const asset = activeAsset();
+  if (!asset) return;
+  const live = report.mode === "live";
+  const updated = asDate(asset.updated);
+  const asOf = asDate(report.as_of);
+  const now = live ? Date.now() : asOf?.getTime();
+  const age = updated && number(now) ? Math.floor((now - updated.getTime())/1000) : null;
+  text("age-label", live ? "Quote age now" : "Age at replay frame");
+  text("quote-age", age == null ? "Unavailable" : age < 0 ? "Future timestamp" : ageText(age));
+  const warning = byId("age-warning");
+  warning.hidden = !live || age == null || (age >= 0 && age <= 180);
+  if (!warning.hidden) warning.textContent = age < 0
+    ? "The quote is ahead of the current clock. Verify its timestamp before using this report."
+    : "This quote is now outside the 180-second freshness window. The displayed state was evaluated at report time.";
+}
+
+function tooOldOnScreen(asset) {
+  if (report?.mode !== "live") return false;
+  const updated = asDate(asset.updated);
+  if (!updated) return true;
+  const age = (Date.now() - updated.getTime()) / 1000;
+  return age < 0 || age > 180;
+}
+
+function briefFor(asset, mark) {
+  const state = tooOldOnScreen(asset) ? "Unknown" : asset.state;
+  const hasQuote = number(asset.bps) && stateClass(state) !== "unknown";
+  const first = asset.symbol + " / USD · " + state + (hasQuote ? " · " + signed(asset.bps) + " bp" : "") + ".";
+  const reason = tooOldOnScreen(asset) && asset.state !== "Unknown" ? "The last quote is outside the live freshness window." : asset.reason;
+  const next = {
+    normal:"Continue sampling for a fresh deviation.",
+    watch:"Check the next distinct source quote for confirmation.",
+    incident:"Verify independent venue prices and the issuer’s redemption status.",
+    unknown:"Check collection health and the upstream timestamp before escalating a peg alert."
+  }[stateClass(state)];
+  const quantity = Intl.NumberFormat("en-US", {maximumFractionDigits:6}).format(units.valueAsNumber);
+  const impactLine = mark ? "Illustrative mark for " + quantity + " units: " + mark + " vs $1." : "Illustrative mark unavailable.";
+  const update = asDate(asset.updated) ? dateText(asset.updated) + " UTC" : "unavailable";
+  return [first + " " + reason, impactLine, "Next: " + next,
+    "Quote updated: " + update + " · " + report.source].join("\n\n");
+}
+
+function renderEvents(asset) {
+  const events = Array.isArray(asset.events) ? asset.events.slice(-3).reverse() : [];
+  const list = byId("changes");
+  list.replaceChildren();
+  byId("changes-panel").hidden = !events.length;
+  for (const event of events) {
+    const item = document.createElement("li");
+    const state = document.createElement("b");
+    state.className = "asset-state " + stateClass(event.state);
+    state.textContent = event.state;
+    const at = document.createElement("time");
+    at.dateTime = event.at;
+    at.textContent = dateText(event.at);
+    item.append(state,at);
+    list.append(item);
+  }
+}
+
+function impact() {
+  const asset = activeAsset();
+  const amount = units.valueAsNumber;
+  const eligible = asset && number(asset.price) && stateClass(asset.state) !== "unknown" && !tooOldOnScreen(asset) && units.validity.valid && number(amount);
+  const signedUsd = eligible ? new Intl.NumberFormat("en-US", {style:"currency", currency:"USD", signDisplay:"exceptZero"}).format(amount * (asset.price - 1)) : null;
+  text("impact-value", signedUsd ?? "Unavailable");
+  text("impact-detail", !units.validity.valid || !number(amount) ? "Enter a quantity between 0 and 1 trillion units." : asset && (stateClass(asset.state) === "unknown" || tooOldOnScreen(asset)) ? "A fresh, valid quote is required for a marked value." : "Illustrative change at the reported quote, before fees or slippage.");
+  if (asset) text("brief", briefFor(asset, signedUsd));
+}
+
+function renderSelected() {
+  const asset = activeAsset();
+  if (!asset) return;
+  text("focus-title", asset.symbol + " / USD");
+  text("focus-state", asset.state);
+  byId("focus-state").className = "status " + stateClass(asset.state);
+  text("focus-bps", number(asset.bps) ? signed(asset.bps) + " bp" : "—");
+  text("focus-price", number(asset.price) ? "$" + asset.price.toFixed(6) : "Unavailable");
+  text("reason", asset.reason);
+  text("quote-time", dateText(asset.updated));
+  chart(asset);
+  renderEvents(asset);
+  refreshAge();
+  impact();
+}
+
+function optionalEvidence(slot, id, value) {
+  byId(slot).hidden = value == null || value === "";
+  text(id,value);
+}
+
+function renderEvidence() {
+  const evidence = report.evidence;
+  text("report-source", report.source);
+  optionalEvidence("evidence-slot", "call-source", evidence?.source);
+  optionalEvidence("endpoint-slot", "endpoint", evidence?.endpoint);
+  optionalEvidence("fetched-slot", "fetched", evidence?.fetched_at ? dateText(evidence.fetched_at) : null);
+  optionalEvidence("credit-slot", "credits", evidence?.credit_count);
+  const note = replayData ? "This offline demo uses generated prices. Live API receipts are available in the server edition." : report.mode !== "live" ? "This replay uses generated prices. Open Live for the latest collected API receipt." : evidence ? "The dashboard checks the local capture store every 15 seconds." : "No call receipt is available for this report.";
+  text("evidence-note", note);
+}
+
+function resetCopy() {
+  clearTimeout(copyReset);
+  text("copy","Copy brief");
+  byId("copy-manual").hidden = true;
+}
+
+function updateUrl() {
+  if (location.protocol === "file:") return;
+  const url = new URL(location.href);
+  url.searchParams.set("mode", report.mode);
+  if (report.mode !== "live") url.searchParams.set("step", String(report.step));
+  else url.searchParams.delete("step");
+  try { history.replaceState(null,"",url); } catch { /* Sandboxed viewers may disable history. */ }
+}
+
+function paint(payload) {
+  report = payload;
+  const assets = report.assets;
+  if (!assets.some((asset) => asset.id === selected)) selected = (assets.find((asset) => asset.symbol === "USDC") || assets[0]).id;
+  byId("empty").hidden = true;
+  byId("results").hidden = false;
+  sourceBadge(report.mode === "live");
+  text("observed", dateText(report.as_of));
+  byId("observed").dateTime = report.as_of;
+  byId("step-box").hidden = report.mode === "live";
+  if (report.mode !== "live") {
+    step.max = report.steps;
+    step.value = report.step;
+    step.setAttribute("aria-valuetext", "Frame " + report.step + " of " + report.steps);
+    text("frame", report.step + " / " + report.steps);
+  }
+  renderAssetList();
+  renderSelected();
+  renderEvidence();
+  updateUrl();
+}
+
+async function load(frame, background = false) {
+  clearTimeout(scrubTimer);
+  const sequence = ++requestId;
+  currentController?.abort();
+  currentController = new AbortController();
+  const route = mode.value;
+  const changingSource = report?.mode !== route;
+  if (changingSource) {
+    report = null;
+    byId("results").hidden = true;
+    byId("step-box").hidden = true;
+    text("observed","—");
+    byId("observed").removeAttribute("datetime");
+  }
+  byId("empty").hidden = true;
+  byId("results").setAttribute("aria-busy","true");
+  sourceBadge(route === "live");
+  byId("refresh").disabled = true;
+  if (!background) resetCopy();
+  const query = new URLSearchParams({mode:route});
+  if (route !== "live" && Number.isInteger(frame) && frame > 0) query.set("step", String(frame));
+  try {
+    let data;
+    if (replayData) {
+      if (route === "live") throw new Error("The offline demo contains four synthetic replays. Live observations require the local server.");
+      const frames = replayData[route] || [];
+      const index = query.has("step") ? Number(query.get("step")) - 1 : frames.length - 1;
+      data = frames[index];
+      if (!data) throw new Error("This replay frame does not exist.");
+    } else {
+      const response = await fetch("/api/report?" + query, {cache:"no-store", signal:currentController.signal});
+      data = await response.json();
+      if (sequence !== requestId) return;
+      if (!response.ok) throw new Error(data.error || "The report request failed.");
+    }
+    if (!Array.isArray(data.assets) || !data.assets.length) throw new Error("No observations are available for this view.");
+    paint(data);
+    text("announcements", data.source + ". Report time " + dateText(data.as_of) + " UTC.");
+  } catch (error) {
+    if (sequence !== requestId || error.name === "AbortError") return;
+    report = null;
+    byId("results").hidden = true;
+    byId("step-box").hidden = true;
+    text("observed","—");
+    byId("observed").removeAttribute("datetime");
+    byId("empty").hidden = false;
+    text("empty-title", route === "live" ? "Live report unavailable" : "Unable to open this replay");
+    text("empty-message", error.message + (route === "live" ? " Run a live collection on the server, then refresh this view. You can explore a synthetic replay in the meantime." : " Select Refresh to try again."));
+  } finally {
+    if (sequence === requestId) {
+      byId("refresh").disabled = false;
+      byId("results").removeAttribute("aria-busy");
+    }
+  }
+}
+
+mode.addEventListener("change", () => load());
+byId("refresh").addEventListener("click", () => load(report?.step));
+step.addEventListener("input", () => {
+  text("frame", step.value + " / " + step.max);
+  clearTimeout(scrubTimer);
+  const requested = Number(step.value);
+  scrubTimer = setTimeout(() => load(requested),60);
+});
+units.addEventListener("input", impact);
+byId("copy").addEventListener("click", async () => {
+  if (!report) return;
+  impact();
+  const brief = byId("brief").textContent;
+  try {
+    await navigator.clipboard.writeText(brief);
+    text("copy","Copied");
+    text("announcements","Triage brief copied.");
+    clearTimeout(copyReset);
+    copyReset = setTimeout(resetCopy,2200);
+  } catch {
+    byId("copy-manual").hidden = false;
+    const field = byId("copy-text");
+    field.value = brief;
+    field.focus();
+    field.select();
+    text("announcements","The brief is selected for copying.");
+  }
+});
+setInterval(() => {
+  if (replayData || document.hidden || mode.value !== "live") return;
+  if (report) { refreshAge(); impact(); }
+  if (!byId("refresh").disabled) load(undefined, true);
+},15000);
+load(Number(params.get("step")));
+</script>
+</body>
+</html>
