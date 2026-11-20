@@ -14,9 +14,9 @@ A second tool examines USDC during March 9–14, 2023. Using daily OHLCV, it com
 
 ## Endpoints and evidence
 
-- `GET /v3/cryptocurrency/quotes/latest` — three stablecoins in USD, source timestamps and observed call credits.
-- `GET /v5/cryptocurrency/ohlcv/historical` — six daily USDC candles with the low, close and low time.
-- `GET /public-api/v3/cryptocurrency/quotes/latest` — optional, separately labeled keyless production preview.
+- `GET /public-api/v3/cryptocurrency/quotes/latest` — real keyless production call captured for the demo; returns USD quotes and source timestamps for three stablecoins.
+- `GET /v3/cryptocurrency/quotes/latest` — authenticated route implemented for the same three-asset quote workflow; a campaign-key capture is not yet recorded.
+- `GET /v5/cryptocurrency/ohlcv/historical` — historical comparison route implemented for daily USDC candles; a live run is not yet recorded.
 - Attribution: [Data provided by CoinMarketCap.com](https://coinmarketcap.com/).
 
 ## What CMC made possible and where we ran into friction
@@ -36,4 +36,4 @@ The Academy response-format article describes v3 quote lookups as an ID-keyed di
 - User testing: not conducted.
 - DoraHacks project URL and X post: pending entrant registration and submission; add the real URLs here after creating them.
 
-The public repository and offline recording are ready. Before final submission, confirm the DoraHacks form accepts the keyless production response as real API evidence or record a fresh authenticated call with the event key. Fill the final project and X post URLs only after they exist.
+The public repository and offline recording are ready. The keyless response is a real CMC production API call and matches the published requirement for visible real-call evidence. A fresh authenticated quote and historical run would further validate the campaign-key paths and strengthen the demo. Fill in the DoraHacks project and X post URLs once those are created.
