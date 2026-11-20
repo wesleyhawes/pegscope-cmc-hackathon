@@ -18,9 +18,11 @@ Record at readable scale. Prepare the key before recording. A screenshot of docu
 
 Built PegScope for stablecoin treasury ops. See when a price move becomes an incident, what it means for a position, and when stale data should stop the estimate.
 
-DoraHacks: <ENTRY_URL>
-Demo: <VIDEO_URL>
+DoraHacks: [add the published BUIDL URL]
+Demo: https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/assets/PegScope-Demo-Preview.mp4
 #BuildwithCMC
+
+The current preview contains a real keyless production API call, not an authenticated campaign-key call. If you capture an authenticated call, replace the preview with the final recording and update this post before publishing.
 
 ## Publication order
 

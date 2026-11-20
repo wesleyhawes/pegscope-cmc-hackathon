@@ -25,14 +25,15 @@ One batched request gives the operator a common USD reference across three asset
 
 The Academy response-format article describes v3 quote lookups as an ID-keyed dictionary, while the current reference and the keyless production response use arrays. We parse the versioned reference shape and check both the asset ID and the quote currency. A version-specific before-and-after example in the Academy article would remove this ambiguity. [Academy guide](https://coinmarketcap.com/academy/article/how-to-read-coinmarketcaps-standardized-json-response-format) · [API reference](https://coinmarketcap.com/api/documentation/pro-api-reference/cryptocurrency)
 
-## Fields to fill after capture and release
+## Submission links and evidence status
 
-- Public repository and tested release or commit: <PUBLIC_GITHUB_URL_AND_TAG>
-- Demo video, accessible while logged out: <VIDEO_URL>
-- Browser replay, if hosted: <OPTIONAL_DEMO_URL>
-- Authenticated receipt shown at: <VIDEO_TIMESTAMP>
-- Historical run outcome and one measured observation: <ACTUAL_RESULT>
-- User validation, if performed: <ACTUAL_COUNT_TASK_TIME_OR_FEEDBACK>
-- X post URL to paste into the form: <X_POST_URL>
+- Public repository: https://github.com/wesleyhawes/pegscope-cmc-hackathon
+- Tested commit: [`73cd5d0`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/73cd5d0fad5757cd1389be1a67bea445512e10b4)
+- Demo recording: https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/assets/PegScope-Demo-Preview.mp4
+- Offline interactive replay: [download from the repository](https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/docs/PegScope-Interactive-Demo.html)
+- Real API evidence: the preview shows a public, keyless CMC quote request and response at approximately 00:35. A redacted capture is documented in [`docs/API-EVIDENCE.md`](../docs/API-EVIDENCE.md). It is not authenticated campaign-key evidence.
+- Authenticated quote and historical OHLCV runs: not captured yet; `CMC_API_KEY` is not available in the build environment. Do not claim those runs as demonstrated until captured with the entrant's own event key.
+- User testing: not conducted.
+- DoraHacks project URL and X post: pending entrant registration and submission; add the real URLs here after creating them.
 
-Replace all angle-bracket placeholders. If a capability did not run successfully with the campaign account, label its actual status or omit the claim. The field list is an editing aid and can be removed from the public description.
+The public repository and offline recording are ready. Before final submission, confirm the DoraHacks form accepts the keyless production response as real API evidence or record a fresh authenticated call with the event key. Fill the final project and X post URLs only after they exist.
