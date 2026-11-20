@@ -93,3 +93,7 @@ python3 -m unittest discover -s tests -v
 - `submission/` holds drafts for the entry, recording and API feedback.
 
 Data provided by [CoinMarketCap.com](https://coinmarketcap.com/).
+
+## License and rights
+
+This repository is published for hackathon review under a proprietary, all-rights-reserved notice. It has no general open-source reuse license. See [LICENSE](LICENSE). Copyright can restrict copying this code and these original assets, but it does not give exclusive rights to the underlying product idea or methods.
