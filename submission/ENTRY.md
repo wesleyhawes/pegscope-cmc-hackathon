@@ -28,7 +28,7 @@ The Academy response-format article describes v3 quote lookups as an ID-keyed di
 ## Submission links and evidence status
 
 - Public repository: https://github.com/wesleyhawes/pegscope-cmc-hackathon
-- Public baseline reviewed: [`224bbd4`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/224bbd4a8350ef56116f616dee2975ecc9e0d384). The current local change set adds the refresh regression and timeline; all 27 tests pass locally. The changes remain unpublished, so their release commit and GitHub CI result are pending.
+- Public baseline reviewed: [`224bbd4`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/224bbd4a8350ef56116f616dee2975ecc9e0d384). The current local candidate is `abd9d356b6deb38f0e8c60179998fc68a9960c64`; all 27 tests pass locally on that commit. The candidate remains unpublished, so its GitHub CI result and public release commit are pending.
 - Demo recording: https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/assets/PegScope-Demo-Preview.mp4
 - Offline interactive replay: [download from the repository](https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/docs/PegScope-Interactive-Demo.html)
 - Real API evidence: the preview shows a public, keyless CMC quote request and response at approximately 00:35. A redacted capture is documented in [`docs/API-EVIDENCE.md`](../docs/API-EVIDENCE.md). It is not authenticated campaign-key evidence.
