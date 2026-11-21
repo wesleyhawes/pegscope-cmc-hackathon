@@ -28,7 +28,7 @@ The Academy response-format article describes v3 quote lookups as an ID-keyed di
 ## Submission links and evidence status
 
 - Public repository: https://github.com/wesleyhawes/pegscope-cmc-hackathon
-- Public baseline reviewed: [`224bbd4`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/224bbd4a8350ef56116f616dee2975ecc9e0d384). Code candidate `abd9d356b6deb38f0e8c60179998fc68a9960c64` passes all 27 local tests and is published on GitHub and backed up on Gitea. GitHub Actions passes on Python 3.10 and 3.13.
+- Public baseline reviewed: [`224bbd4`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/224bbd4a8350ef56116f616dee2975ecc9e0d384). Current public release candidate is [`50aa29a`](https://github.com/wesleyhawes/pegscope-cmc-hackathon/commit/50aa29a255caee5e1d5c580f393257e702f91df5), which includes the refresh fix and incident timeline. The 27-test offline suite passes, GitHub Actions passes on Python 3.10 and 3.13, and the same commit is backed up on Gitea.
 - Demo recording: https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/assets/PegScope-Demo-Preview.mp4
 - Offline interactive replay: [download from the repository](https://github.com/wesleyhawes/pegscope-cmc-hackathon/blob/main/docs/PegScope-Interactive-Demo.html)
 - Real API evidence: the preview shows a public, keyless CMC quote request and response at approximately 00:35. A redacted capture is documented in [`docs/API-EVIDENCE.md`](../docs/API-EVIDENCE.md). It is not authenticated campaign-key evidence.
@@ -36,4 +36,4 @@ The Academy response-format article describes v3 quote lookups as an ID-keyed di
 - User testing: not conducted.
 - DoraHacks project URL and X post: pending entrant registration and submission; add the real URLs here after creating them.
 
-The public baseline and offline recording are available. The keyless response is a real CMC production API call. The refresh fix, incident timeline, and rehearsal script are prepared locally but have not been published. A fresh authenticated quote and historical run would validate campaign-key paths and strengthen the demo. Fill in the DoraHacks project and X post URLs once those are created.
+The source refresh fix, incident timeline, and operator test protocol are published. Remaining release evidence is an authenticated quote and historical OHLCV capture, two real operator sessions, the DoraHacks BUIDL URL, and the required X post URL. Do not report those items as complete until the real evidence and links have been recorded.
