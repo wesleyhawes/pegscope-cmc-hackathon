@@ -43,7 +43,7 @@
         <div class="step-label"><label for="step">Replay frame</label><output id="frame" for="step">—</output></div>
         <input aria-label="Replay frame" id="step" type="range" min="1" max="1" value="1">
       </div>
-      <div class="observation"><span class="field">Report time · UTC</span><time id="observed">—</time></div>
+      <div class="observation"><span class="field">Evaluation time · UTC</span><time id="observed">—</time></div>
       <button type="button" id="refresh" class="refresh">Refresh</button>
     </section>
     <div id="announcements" class="sr-only" role="status" aria-live="polite"></div>
@@ -74,13 +74,17 @@
             <div class="side-header"><h2 id="changes-title">Recent state changes</h2><span class="field">UTC</span></div>
             <ol id="changes" class="changes"></ol>
           </section>
+          <section class="panel changes-panel" id="timeline-panel" aria-labelledby="timeline-title" hidden>
+            <div class="side-header"><h2 id="timeline-title">Incident evidence timeline</h2><span class="field">Capture time · UTC</span></div>
+            <dl id="incident-timeline" class="evidence"></dl>
+          </section>
           <section class="panel evidence-panel" aria-labelledby="evidence-title">
             <div class="side-header"><h2 id="evidence-title">Evidence</h2></div>
             <dl class="evidence">
               <div><dt>Data source</dt><dd id="report-source">—</dd></div>
               <div id="evidence-slot" hidden><dt>Call source</dt><dd id="call-source"></dd></div>
               <div id="endpoint-slot" hidden><dt>Endpoint</dt><dd><code id="endpoint"></code></dd></div>
-              <div id="fetched-slot" hidden><dt>Fetched · UTC</dt><dd id="fetched"></dd></div>
+              <div id="fetched-slot" hidden><dt>Latest source capture · UTC</dt><dd id="fetched"></dd></div>
               <div id="credit-slot" hidden><dt>Call credits</dt><dd id="credits"></dd></div>
             </dl>
             <p class="evidence-note" id="evidence-note"></p>

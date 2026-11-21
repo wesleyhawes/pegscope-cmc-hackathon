@@ -44,6 +44,7 @@ def fetch_cmc(path, params):
                 raise ApiError(f"Unexpected HTTP status {response.status}.")
             raw = response.read(MAX_RESPONSE + 1)
     except HTTPError as error:
+        error.close()
         messages = {401: "Check the local key.", 403: "Check the plan entitlement.",
                     429: "Rate or credit limit reached. Pause before retrying."}
         hint = messages.get(error.code, "Check provider status and request parameters.")

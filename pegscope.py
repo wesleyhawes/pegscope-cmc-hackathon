@@ -62,9 +62,6 @@ def report(db, mode, step=None, current=now):
         frames, evidence = live_history(db)
         steps = len(frames)
         as_of = current()
-        if as_of > frames[-1]["at"]:
-            # Same provider timestamp cannot confirm a breach. It can become stale with the clock.
-            frames.append({"at": as_of, "quotes": frames[-1]["quotes"]})
         source = evidence["source"]
         step = steps
     else:
@@ -76,7 +73,7 @@ def report(db, mode, step=None, current=now):
             raise ValueError(f"Step must be between 1 and {steps}.")
         frames = frames[:step]
         source = "Synthetic scenario • illustrative prices"
-    result = analyze(frames)
+    result = analyze(frames, evaluated_at=as_of if mode == "live" else None)
     for asset in result["assets"]:
         asset["series"] = asset["series"][-120:]
     return dict(result, mode=mode, source=source, step=step, steps=steps, evidence=evidence)

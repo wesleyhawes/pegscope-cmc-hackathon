@@ -188,6 +188,31 @@ class CaptureAndReportTests(unittest.TestCase):
             with self.subTest(mode=mode, step=step), self.assertRaises(ValueError):
                 app.report(self.db, mode, step)
 
+    def test_future_quote_is_not_replayed_as_a_new_observation_on_refresh(self):
+        save(self.db, "future-feed", 0, 1.0, observed=60)
+        first = app.report(self.db, "live", current=lambda: stamp(65))
+        again = app.report(self.db, "live", current=lambda: stamp(66))
+        for report in (first, again):
+            asset = one_asset(report)
+            self.assertEqual(asset["state"], "Unknown")
+            self.assertEqual(asset["series"], [{"at": stamp(0), "bps": None}])
+            self.assertEqual(report["as_of"], stamp(0).replace(".000Z", "Z"))
+        self.assertEqual(first["evaluated_at"], stamp(65).replace(".000Z", "Z"))
+        self.assertEqual(again["evaluated_at"], stamp(66).replace(".000Z", "Z"))
+        save(self.db, "future-feed", 70, 1.0)
+        restored = app.report(self.db, "live", current=lambda: stamp(71))
+        self.assertEqual(one_asset(restored)["state"], "Normal")
+        self.assertEqual(len(one_asset(restored)["series"]), 2)
+
+    def test_live_expiry_uses_inclusive_boundary_and_keeps_fractional_time(self):
+        save(self.db, "boundary", 0, 1.0)
+        valid = app.report(self.db, "live", current=lambda: stamp(180))
+        expired = app.report(self.db, "live", current=lambda: stamp(180.001))
+        self.assertEqual(one_asset(valid)["state"], "Normal")
+        self.assertEqual(one_asset(expired)["state"], "Unknown")
+        self.assertEqual(expired["evaluated_at"], "2026-11-18T12:03:00.001000Z")
+        self.assertEqual(len(one_asset(expired)["series"]), 1)
+
     def test_http_report_errors_and_success_on_loopback(self):
         class QuietHandler(app.handler_for(self.db)):
             def log_message(self, *args):

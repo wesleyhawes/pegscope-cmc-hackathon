@@ -159,7 +159,7 @@ function refreshAge() {
   if (!asset) return;
   const live = report.mode === "live";
   const updated = asDate(asset.updated);
-  const asOf = asDate(report.as_of);
+  const asOf = asDate(report.evaluated_at || report.as_of);
   const now = live ? Date.now() : asOf?.getTime();
   const age = updated && number(now) ? Math.floor((now - updated.getTime())/1000) : null;
   text("age-label", live ? "Quote age now" : "Age at replay frame");
@@ -215,6 +215,30 @@ function renderEvents(asset) {
   }
 }
 
+function renderTimeline(asset) {
+  const timeline = asset.timeline || {};
+  const rows = [
+    ["First breach", timeline.first_breach_at],
+    ["Confirmed", timeline.confirmed_at],
+    ["Peak observed", timeline.peak_deviation ? signed(timeline.peak_deviation.bps) + " bp · " + dateText(timeline.peak_deviation.at) + " UTC" : null],
+    ["Latest evidence", timeline.most_recent_evidence ? signed(timeline.most_recent_evidence.bps) + " bp · " + dateText(timeline.most_recent_evidence.at) + " UTC" : null],
+    ["Recovered", timeline.recovered_at],
+    ["Unknown intervals", Array.isArray(timeline.unknown_intervals) && timeline.unknown_intervals.length ? timeline.unknown_intervals.map(dateText).join(", ") + " UTC" : null]
+  ];
+  const target = byId("incident-timeline");
+  target.replaceChildren();
+  for (const [label, value] of rows) {
+    const item = document.createElement("div");
+    const term = document.createElement("dt");
+    const description = document.createElement("dd");
+    term.textContent = label;
+    description.textContent = value ? (label === "First breach" || label === "Confirmed" || label === "Recovered" ? dateText(value) + " UTC" : value) : "—";
+    item.append(term, description);
+    target.append(item);
+  }
+  byId("timeline-panel").hidden = !asset.series?.length;
+}
+
 function impact() {
   const asset = activeAsset();
   const amount = units.valueAsNumber;
@@ -237,6 +261,7 @@ function renderSelected() {
   text("quote-time", dateText(asset.updated));
   chart(asset);
   renderEvents(asset);
+  renderTimeline(asset);
   refreshAge();
   impact();
 }
@@ -253,7 +278,7 @@ function renderEvidence() {
   optionalEvidence("endpoint-slot", "endpoint", evidence?.endpoint);
   optionalEvidence("fetched-slot", "fetched", evidence?.fetched_at ? dateText(evidence.fetched_at) : null);
   optionalEvidence("credit-slot", "credits", evidence?.credit_count);
-  const note = replayData ? "This offline demo uses generated prices. Live API receipts are available in the server edition." : report.mode !== "live" ? "This replay uses generated prices. Open Live for the latest collected API receipt." : evidence ? "The dashboard checks the local capture store every 15 seconds." : "No call receipt is available for this report.";
+  const note = replayData ? "This offline demo uses generated prices. Live API receipts are available in the server edition." : report.mode !== "live" ? "This replay uses generated prices. Open Live for the latest collected API receipt." : evidence ? "The evaluation clock advances on refresh; chart points advance only when the collector stores a new source capture." : "No call receipt is available for this report.";
   text("evidence-note", note);
 }
 
@@ -279,8 +304,9 @@ function paint(payload) {
   byId("empty").hidden = true;
   byId("results").hidden = false;
   sourceBadge(report.mode === "live");
-  text("observed", dateText(report.as_of));
-  byId("observed").dateTime = report.as_of;
+  const reportTime = report.evaluated_at || report.as_of;
+  text("observed", dateText(reportTime));
+  byId("observed").dateTime = reportTime;
   byId("step-box").hidden = report.mode === "live";
   if (report.mode !== "live") {
     step.max = report.steps;

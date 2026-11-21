@@ -25,7 +25,7 @@ def _time(value):
 
 
 def _utc(value):
-    return value.isoformat(timespec="seconds").replace("+00:00", "Z")
+    return value.isoformat(timespec="auto").replace("+00:00", "Z")
 
 
 @dataclass
@@ -136,7 +136,7 @@ class _Tracker:
                 "last_valid_update": _utc(self.observed) if self.observed else None}
 
 
-def analyze(frames):
+def analyze(frames, evaluated_at=None):
     """Replay frames in observation order. Time and state depend only on the input.
 
     Missing or stale samples output Unknown and break consecutive evidence. A
@@ -159,17 +159,53 @@ def analyze(frames):
             tracker.sample(now, quote)
             tracker.series.append({"at": frame["at"], "bps": tracker.bps})
             if tracker.state != old_state or not tracker.events:
-                tracker.events.append({"at": frame["at"], "state": tracker.state, "reason": tracker.reason})
+                tracker.events.append({"at": frame["at"], "state": tracker.state,
+                                       "reason": tracker.reason, "bps": tracker.bps})
         previous = now
 
-    assets = [tracker.report() for tracker in trackers]
+    evaluation = _time(evaluated_at) if evaluated_at is not None else previous
+    assets = []
+    for tracker in trackers:
+        snapshot = tracker.report()
+        if evaluation is not None and tracker.observed is not None:
+            age = (evaluation - tracker.observed).total_seconds()
+            if age < 0:
+                snapshot.update(state="Unknown", reason="Last valid source update is in the future.",
+                                price=None, bps=None)
+            elif age > FRESH_SECONDS:
+                snapshot.update(state="Unknown",
+                                reason=f"Last valid source quote is {age:.3f}s old, beyond the {FRESH_SECONDS}s freshness limit.",
+                                price=None, bps=None)
+        snapshot["timeline"] = _timeline(tracker.series, tracker.events)
+        assets.append(snapshot)
     group = []
     for state in ("Incident", "Watch", "Unknown", "Normal"):
         symbols = [asset["symbol"] for asset in assets if asset["state"] == state]
         if symbols:
             group.append(f"{state}: {', '.join(symbols)}")
     brief = ". ".join(group) + "." if previous else "Awaiting the first observation."
-    return {"as_of": _utc(previous) if previous else None, "assets": assets, "brief": brief}
+    return {"as_of": _utc(previous) if previous else None,
+            "evaluated_at": _utc(evaluation) if evaluation else None,
+            "assets": assets, "brief": brief}
+
+
+def _timeline(series, events):
+    """Summarize observed evidence without turning view-time ticks into observations."""
+    valid = [point for point in series if isinstance(point.get("bps"), (int, float))]
+    breach = next((point for point in valid if abs(point["bps"]) >= WATCH_BPS), None)
+    confirmed = next((event for event in events if event["state"] == "Incident"), None)
+    recovery = next((event for event in events if event["state"] == "Normal" and
+                     confirmed is not None and event["at"] > confirmed["at"]), None)
+    peak = max(valid, key=lambda point: abs(point["bps"])) if valid else None
+    latest = valid[-1] if valid else None
+    gaps = [point["at"] for point in series if point.get("bps") is None]
+    return {"first_breach_at": breach["at"] if breach else None,
+            "confirmed_at": confirmed["at"] if confirmed else None,
+            "peak_deviation": ({"at": peak["at"], "bps": peak["bps"]} if peak else None),
+            "most_recent_evidence": ({"at": latest["at"], "bps": latest["bps"]} if latest else None),
+            "latest_state_change": events[-1] if events else None,
+            "recovered_at": recovery["at"] if recovery else None,
+            "unknown_intervals": gaps}
 
 
 def scenario(name):

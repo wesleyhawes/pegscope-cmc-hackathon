@@ -5,10 +5,10 @@
 | Time | Operator action | What the judge should see |
 | --- | --- | --- |
 | 0–10 s | Open the desk on the M4 in Peg drift, frame 8, USDC selected. | “This example treasury holds 100,000 USDC. At $0.993 the indicative difference is $700. Should somebody investigate?” Show the synthetic label. |
-| 10–27 s | Scrub to frame 6 (−55 bp), then 7 (−61 bp); return to 8. Copy the brief. | First qualifying update warrants a Watch. The next distinct, same-side update confirms an Incident. USDT and DAI give asset-level context. |
-| 27–39 s | Choose Stale feed, then Recovery. | Stale USDC becomes Unknown and the estimate disappears. Two close-to-peg updates clear the synthetic incident. |
+| 10–27 s | Scrub to frame 6 (−55 bp), then 7 (−61 bp); return to 8. Copy the brief and open the incident timeline. | First qualifying update warrants a Watch. The next distinct, same-side update confirms an Incident. The timeline shows breach, confirmation, peak, latest evidence and recovery context. |
+| 27–39 s | Choose Stale feed, then Recovery. | Unknown samples are visible. Stale USDC loses its estimate; two close-to-peg updates clear the synthetic incident. |
 | 39–58 s | Cut to the actual authenticated request code in cmc_client.py, then run `python3 pegscope.py sample --proof`. | Show request URL, query parameters, **HTTP 200**, status timestamp, error code, credit count and a real returned price/update pair together. Frame only the terminal and code. Use the real values on the day. |
-| 58–69 s | Switch to Live · Collected quotes. | Show the authenticated source, latest fetch time and the actual market state, including Normal if that is what the data says. |
+| 58–69 s | Switch to Live · Collected quotes and refresh once without running the collector. | Evaluation time advances, latest source capture and chart remain fixed. A new chart point appears only after a new collection. State actual market values, including Normal if that is what the data says. |
 | 69–82 s | Run `python3 casefile.py`. | Show the daily low versus close and time of the low for the date printed by the app. Speak the actual measured values. |
 | 82–90 s | Show the repo and the offline replay link. | Give the viewer the one-command start and the public URL. |
 
